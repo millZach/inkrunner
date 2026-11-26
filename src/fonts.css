@@ -1,0 +1,22 @@
+/* Bundle the original typefaces so the installed game works offline. */
+@font-face {
+  font-family: 'Shippori Mincho';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('@fontsource/shippori-mincho/files/shippori-mincho-japanese-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Shippori Mincho';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('@fontsource/shippori-mincho/files/shippori-mincho-japanese-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Yuji Syuku';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('@fontsource/yuji-syuku/files/yuji-syuku-japanese-400-normal.woff2') format('woff2');
+}

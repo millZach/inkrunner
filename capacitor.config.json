@@ -1,0 +1,14 @@
+{
+  "appId": "com.millzach.inkrunner",
+  "appName": "INKRUNNER",
+  "webDir": "dist",
+  "backgroundColor": "#efe6d3",
+  "plugins": {
+    "CapacitorHttp": { "enabled": true }
+  },
+  "ios": {
+    "contentInset": "never",
+    "scrollEnabled": false,
+    "preferredContentMode": "mobile"
+  }
+}

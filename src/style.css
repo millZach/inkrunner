@@ -1,0 +1,1060 @@
+:root {
+  --paper: #efe6d3;
+  --ink: #17161b;
+  --shu: #e2412a;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Shippori Mincho', Georgia, serif;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+canvas#game {
+  display: block;
+  cursor: none;
+  touch-action: none;
+}
+
+#viewport {
+  position: fixed;
+  inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease;
+}
+
+.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#menu {
+  background: radial-gradient(ellipse at center, rgba(239, 230, 211, 0.93) 35%, rgba(239, 230, 211, 0.6) 80%);
+  cursor: default;
+  overflow-y: auto;
+  justify-content: safe center;
+  padding: max(2vh, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(2vh, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  touch-action: pan-y;
+}
+
+.title-block {
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+.kanji-title {
+  font-family: 'Yuji Syuku', serif;
+  font-size: clamp(64px, 12vh, 140px);
+  line-height: 1;
+  text-shadow: 4px 4px 0 rgba(23, 22, 27, 0.12);
+}
+
+h1 {
+  font-weight: 600;
+  letter-spacing: 0.6em;
+  margin: 0.3rem 0 0.2rem 0.6em;
+  font-size: clamp(18px, 2.8vh, 30px);
+}
+
+.tagline {
+  font-style: italic;
+  margin: 0;
+  opacity: 0.75;
+  font-size: 1.05rem;
+}
+
+.tagline::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 4px;
+  margin: 12px auto 0;
+  background: var(--shu);
+  border-radius: 2px;
+}
+
+/* scroll picker */
+.scrolls {
+  display: flex;
+  gap: 10px;
+  margin: 0.6rem 0 0.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.scroll {
+  font: inherit;
+  color: inherit;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  text-align: left;
+  min-width: 190px;
+  padding: 8px 14px 8px 10px;
+  background: rgba(255, 252, 244, 0.55);
+  border: 1.5px solid rgba(23, 22, 27, 0.25);
+  border-radius: 3px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+}
+
+.scroll:hover {
+  transform: translateY(-2px);
+}
+
+.scroll.selected {
+  border-color: var(--ink);
+  background: rgba(255, 252, 244, 0.9);
+  box-shadow: 3px 3px 0 rgba(23, 22, 27, 0.12);
+}
+
+.scroll .k {
+  grid-row: span 2;
+  font-family: 'Yuji Syuku', serif;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.scroll.selected .k {
+  color: var(--shu);
+}
+
+.scroll .n {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.scroll .b {
+  font-size: 0.8rem;
+  font-style: italic;
+  opacity: 0.65;
+}
+
+.mini {
+  font-style: normal;
+  font-family: 'Yuji Syuku', serif;
+  display: inline-block;
+  background: var(--shu);
+  color: var(--paper);
+  border-radius: 2px;
+  padding: 0 3px;
+  margin-right: 2px;
+}
+
+/* title tabs: the campaign and free play */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0.5rem 0 0.1rem;
+  border-bottom: 1.5px solid rgba(23, 22, 27, 0.18);
+}
+
+.tab {
+  font: inherit;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1.5px;
+  padding: 8px 18px 6px;
+  min-height: 40px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s;
+}
+
+.tab:hover {
+  opacity: 0.85;
+}
+
+.tab[aria-selected='true'] {
+  opacity: 1;
+  font-weight: 600;
+  border-bottom-color: var(--shu);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--shu);
+  outline-offset: 2px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+/* the campaign at a glance: one chip per chapter, read from campaign/data.ts */
+.journey {
+  display: flex;
+  gap: 8px;
+  margin: 0.6rem 0 0.1rem;
+  justify-content: center;
+}
+
+.chap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  padding: 5px 10px 4px;
+  background: rgba(255, 252, 244, 0.55);
+  border: 1.5px solid rgba(23, 22, 27, 0.22);
+  border-radius: 3px;
+}
+
+.chap .k {
+  font-family: 'Yuji Syuku', serif;
+  font-size: 30px;
+  line-height: 1.05;
+}
+
+.chap .n {
+  font-size: 0.74rem;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.chap.open {
+  border-color: var(--ink);
+  background: rgba(255, 252, 244, 0.9);
+  box-shadow: 3px 3px 0 rgba(23, 22, 27, 0.12);
+}
+
+.chap.cleared .k {
+  color: var(--shu);
+}
+
+.chap.locked {
+  opacity: 0.6;
+}
+
+.chap.sealed {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+.journey-next {
+  margin: 0.35rem 0 0;
+  font-style: italic;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.choose {
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  opacity: 0.6;
+  margin: 0.8rem 0 0.6rem;
+}
+
+.cards {
+  display: flex;
+  gap: 24px;
+}
+
+.card {
+  font: inherit;
+  color: inherit;
+  background: rgba(255, 252, 244, 0.6);
+  border: 1.5px solid rgba(23, 22, 27, 0.35);
+  border-radius: 4px;
+  padding: 10px 10px 14px;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: 3px 4px 0 rgba(23, 22, 27, 0.08);
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-4px) rotate(-0.4deg);
+  border-color: var(--shu);
+  box-shadow: 5px 8px 0 rgba(226, 65, 42, 0.18);
+  outline: none;
+}
+
+.card canvas {
+  display: block;
+  width: 280px;
+  height: 190px;
+}
+
+.card .name {
+  font-size: 1.45rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.card .name span {
+  font-family: 'Yuji Syuku', serif;
+  font-weight: 400;
+  color: var(--shu);
+  margin-left: 6px;
+}
+
+.card .desc {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.card .ability {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--shu);
+}
+
+.controls {
+  margin-top: 1.2rem;
+  opacity: 0.7;
+  font-size: 0.92rem;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.touch-only {
+  display: none;
+}
+
+body.touch .touch-only {
+  display: block;
+}
+
+body.touch .desktop-only {
+  display: none;
+}
+
+/* campaign map: a handscroll painted on the canvas, with real buttons over its nodes */
+#map {
+  background: var(--paper);
+  cursor: default;
+  z-index: 2;
+}
+
+#map .map-view {
+  position: absolute;
+  inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden;
+  /* clip, not a scroll container: focusing an off-screen node must not shift the button layer */
+  overflow: clip;
+  touch-action: none;
+  cursor: grab;
+}
+
+#map .map-view.dragging {
+  cursor: grabbing;
+}
+
+#map canvas {
+  display: block;
+}
+
+.map-nodes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-node {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.map-node[data-state='locked'] {
+  cursor: not-allowed;
+}
+
+.map-node:focus-visible {
+  outline: 2px solid var(--shu);
+  outline-offset: 3px;
+}
+
+/* the hanging-scroll markers on the map: each replays its cutscene */
+.map-slots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: none;
+  transition: background 0.2s;
+}
+
+.map-slot:hover {
+  background: rgba(23, 22, 27, 0.05);
+}
+
+.map-slot[data-state='locked'] {
+  cursor: default;
+}
+
+.map-slot[data-state='locked']:hover {
+  background: transparent;
+}
+
+.map-slot:focus-visible {
+  outline: 2px solid var(--shu);
+  outline-offset: 2px;
+}
+
+.map-hud {
+  position: absolute;
+  top: calc(26px + env(safe-area-inset-top));
+  left: calc(46px + env(safe-area-inset-left));
+  right: calc(46px + env(safe-area-inset-right));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.map-hud > * {
+  pointer-events: auto;
+}
+
+.map-travelers {
+  display: flex;
+  gap: 6px;
+}
+
+.map-btn {
+  font: inherit;
+  font-size: 0.95rem;
+  min-height: 44px;
+  padding: 6px 16px;
+  color: var(--ink);
+  background: rgba(239, 230, 211, 0.88);
+  border: 1.5px solid rgba(23, 22, 27, 0.45);
+  border-radius: 3px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.map-btn span {
+  font-family: 'Yuji Syuku', serif;
+  color: var(--shu);
+  margin-left: 4px;
+}
+
+.map-btn:hover {
+  border-color: var(--ink);
+}
+
+.map-btn[aria-checked='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.map-btn:focus-visible {
+  outline: 2px solid var(--shu);
+  outline-offset: 2px;
+}
+
+#map-back::before {
+  content: '‹ ';
+}
+
+/* at the top, between the buttons: the foot of the scroll is the river, where the paint-in happens */
+.map-hint {
+  position: absolute;
+  left: 50%;
+  top: calc(36px + env(safe-area-inset-top));
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 4px 14px;
+  font-style: italic;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  background: rgba(239, 230, 211, 0.8);
+  border-radius: 3px;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.map-hint.note {
+  color: var(--shu);
+  opacity: 1;
+}
+
+.map-hint {
+  transition: opacity 0.4s;
+}
+
+.map-hint.quiet {
+  opacity: 0;
+}
+
+/* finish */
+#finish {
+  justify-content: flex-end;
+  padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) max(6vh, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background: linear-gradient(to top, rgba(239, 230, 211, 0.94) 0%, rgba(239, 230, 211, 0) 45%);
+  cursor: default;
+  gap: 12px;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.stamp {
+  font-family: 'Yuji Syuku', serif;
+  font-size: 58px;
+  line-height: 1;
+  width: 86px;
+  height: 86px;
+  display: grid;
+  place-items: center;
+  background: var(--shu);
+  color: var(--paper);
+  border-radius: 8px;
+  transform: rotate(-5deg);
+  box-shadow: 0 0 0 3px rgba(226, 65, 42, 0.25);
+  animation: stamp 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+@keyframes stamp {
+  from {
+    transform: rotate(-5deg) scale(2.2);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(-5deg) scale(1);
+    opacity: 1;
+  }
+}
+
+#finish h2 {
+  font-family: 'Yuji Syuku', serif;
+  font-weight: 400;
+  font-size: clamp(28px, 4.6vh, 50px);
+  margin: 0;
+}
+
+#finish .rank {
+  margin: 0.1rem 0 0;
+  font-weight: 600;
+  color: var(--shu);
+}
+
+#finish .stats {
+  font-style: italic;
+  opacity: 0.75;
+  margin: 0.2rem 0 0;
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.buttons button {
+  font: inherit;
+  font-size: 1rem;
+  padding: 9px 20px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.buttons button:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.buttons button.primary {
+  background: var(--shu);
+  border-color: var(--shu);
+  color: #fff8ee;
+}
+
+.buttons button.primary:hover {
+  background: #c23420;
+}
+
+/* recording banner */
+#rec {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  background: rgba(239, 230, 211, 0.92);
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  font-style: italic;
+  transition: opacity 0.4s;
+}
+
+#rec .dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--shu);
+  margin-right: 6px;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.25;
+  }
+}
+
+/* touch controls */
+#jump {
+  position: fixed;
+  left: calc(22px + env(safe-area-inset-left));
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 2px solid rgba(23, 22, 27, 0.55);
+  background: rgba(239, 230, 211, 0.55);
+  color: var(--ink);
+  font-family: 'Yuji Syuku', serif;
+  font-size: 40px;
+  touch-action: none;
+  transition:
+    opacity 0.4s,
+    transform 0.08s;
+}
+
+#jump.down {
+  transform: scale(0.92);
+  background: rgba(23, 22, 27, 0.15);
+}
+
+#mute {
+  position: fixed;
+  right: calc(14px + env(safe-area-inset-right));
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(23, 22, 27, 0.35);
+  background: rgba(239, 230, 211, 0.6);
+  color: var(--ink);
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+#mute.off {
+  opacity: 0.45;
+}
+
+#rotate {
+  display: none;
+}
+
+#pause-button {
+  position: fixed;
+  right: calc(92px + env(safe-area-inset-right));
+  top: calc(8px + env(safe-area-inset-top));
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid rgba(23, 22, 27, 0.35);
+  border-radius: 50%;
+  background: rgba(239, 230, 211, 0.6);
+  color: var(--ink);
+  font-size: 22px;
+  touch-action: none;
+}
+
+#pause {
+  z-index: 5;
+  background: rgba(239, 230, 211, 0.65);
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  transition: opacity 0.15s;
+}
+
+.pause-sheet {
+  max-width: 460px;
+  padding: 24px;
+  background: rgba(239, 230, 211, 0.96);
+  border: 1.5px solid rgba(23, 22, 27, 0.35);
+  border-radius: 4px;
+  box-shadow: 4px 5px rgba(23, 22, 27, 0.12);
+  text-align: center;
+}
+
+#pause h2 {
+  font: 32px 'Yuji Syuku', serif;
+  margin: 0 0 16px;
+}
+
+#pause .buttons button { min-height: 44px; }
+
+/* ink keys: one row per ink, click it, press a key */
+#keys {
+  z-index: 5;
+  background: rgba(239, 230, 211, 0.65);
+  transition: opacity 0.15s;
+}
+
+#keys h2 {
+  font: 32px 'Yuji Syuku', serif;
+  margin: 0 0 16px;
+}
+
+.key-rows {
+  display: grid;
+  gap: 8px;
+  min-width: 300px;
+}
+
+.key-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px solid rgba(23, 22, 27, 0.35);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.key-row:hover,
+.key-row.listening {
+  border-color: var(--ink);
+  background: rgba(23, 22, 27, 0.06);
+}
+
+.key-row .stone {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--paper);
+  font: 19px 'Yuji Syuku', serif;
+}
+
+.key-row .name {
+  flex: 1;
+  text-align: left;
+}
+
+.key-row kbd {
+  min-width: 2.2em;
+  padding: 2px 8px;
+  font: 600 1rem inherit;
+  font-family: inherit;
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  text-align: center;
+}
+
+.key-row.listening kbd {
+  border-style: dashed;
+}
+
+.key-note {
+  min-height: 1.4em;
+  margin: 12px 0 14px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.text-button {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+}
+
+#export-status {
+  position: fixed;
+  z-index: 6;
+  left: 50%;
+  top: calc(14px + env(safe-area-inset-top));
+  transform: translateX(-50%);
+  max-width: 80vw;
+  padding: 10px 18px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  text-align: center;
+}
+
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    text-align: center;
+    padding: 2rem;
+  }
+  #rotate div {
+    font-family: 'Yuji Syuku', serif;
+    font-size: 96px;
+    animation: tilt 2.4s ease-in-out infinite;
+  }
+  @keyframes tilt {
+    50% {
+      transform: rotate(-90deg);
+    }
+  }
+}
+
+/* short landscape screens (phones) */
+@media (max-height: 560px) {
+  .kanji-title {
+    font-size: 54px;
+  }
+  .tagline {
+    font-size: 0.85rem;
+  }
+  .tagline::after {
+    margin-top: 6px;
+  }
+  .scroll {
+    min-width: 0;
+    padding: 4px 10px 4px 6px;
+  }
+  .scroll .k {
+    font-size: 24px;
+  }
+  .scroll .b {
+    display: none;
+  }
+  .choose {
+    margin: 0.4rem 0 0.3rem;
+  }
+  .card canvas {
+    width: 180px;
+    height: 122px;
+  }
+  .card {
+    padding: 6px 6px 8px;
+  }
+  .card .name {
+    font-size: 1.1rem;
+  }
+  .card .desc {
+    display: none;
+  }
+  .controls {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .stamp {
+    width: 60px;
+    height: 60px;
+    font-size: 40px;
+  }
+  .tabs {
+    margin-top: 0.3rem;
+  }
+  .tab {
+    padding: 5px 14px 4px;
+    min-height: 34px;
+  }
+  .journey {
+    margin-top: 0.4rem;
+  }
+  .chap .k {
+    font-size: 24px;
+  }
+}
+
+/* phones in landscape */
+@media (max-height: 440px) {
+  .kanji-title {
+    font-size: 34px;
+  }
+  h1 {
+    font-size: 15px;
+    margin-top: 0;
+  }
+  .tagline {
+    display: none;
+  }
+  .scrolls {
+    gap: 6px;
+    margin: 0.3rem 0 0;
+  }
+  .scroll {
+    padding: 3px 8px 3px 5px;
+  }
+  .scroll .k {
+    font-size: 18px;
+  }
+  .scroll .n {
+    font-size: 0.78rem;
+  }
+  .choose {
+    font-size: 0.65rem;
+    margin: 0.35rem 0 0.25rem;
+  }
+  .card canvas {
+    width: 150px;
+    height: 100px;
+  }
+  .card .name {
+    font-size: 0.95rem;
+    margin-top: 2px;
+  }
+  .card .ability {
+    font-size: 0.7rem;
+    margin-top: 2px;
+  }
+  .controls {
+    font-size: 0.7rem;
+    margin-top: 0.3rem;
+  }
+  #finish {
+    padding-bottom: max(3vh, env(safe-area-inset-bottom));
+    gap: 6px;
+  }
+  #finish h2 {
+    font-size: 24px;
+  }
+  .buttons button {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+  .tabs {
+    margin: 0.2rem 0 0;
+  }
+  .tab {
+    font-size: 0.82rem;
+    padding: 3px 12px 2px;
+    min-height: 32px;
+  }
+  .journey {
+    gap: 5px;
+    margin: 0.3rem 0 0;
+  }
+  .chap {
+    flex-direction: row;
+    gap: 5px;
+    min-width: 0;
+    padding: 2px 8px;
+  }
+  .chap .k {
+    font-size: 17px;
+  }
+  .chap .n {
+    font-size: 0.68rem;
+  }
+  .journey-next {
+    font-size: 0.72rem;
+    margin-top: 0.2rem;
+  }
+  .map-hud {
+    top: calc(14px + env(safe-area-inset-top));
+    left: calc(26px + env(safe-area-inset-left));
+    right: calc(26px + env(safe-area-inset-right));
+  }
+  .map-btn {
+    font-size: 0.8rem;
+    min-height: 40px;
+    padding: 4px 11px;
+  }
+  .map-hint {
+    font-size: 0.72rem;
+    top: calc(24px + env(safe-area-inset-top));
+  }
+}
+
+/* Keep both travelers reachable even on compact landscape screens. */
+@media (max-height: 360px) {
+  .title-block { margin-bottom: 0.2rem; }
+  .kanji-title { font-size: 24px; }
+  .card canvas { width: 120px; height: 80px; }
+  .card .name { font-size: 0.85rem; }
+  .card .ability { font-size: 0.62rem; }
+  .scroll .n { font-size: 0.7rem; }
+  .choose { margin: 0.25rem 0; }
+  .controls { font-size: 0.6rem; margin: 0.2rem 0 0; }
+  .tab { min-height: 28px; font-size: 0.74rem; }
+  .chap .n { display: none; }
+  .journey-next { display: none; }
+}
+
+/* Touch: keep the title tabs' look but give each a hit area of at least 44 px. */
+@media (pointer: coarse) {
+  .tab { position: relative; }
+  .tab::after { content: ''; position: absolute; inset: -8px -4px; }
+}

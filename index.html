@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#efe6d3" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="description" content="A runner across a living ink scroll. The world is ink. Your brush is the only color." />
+    <meta property="og:title" content="INKRUNNER 墨" />
+    <meta property="og:description" content="The world is ink. Your brush is the only color." />
+    <title>INKRUNNER 墨 — The world is ink. Your brush is the only color.</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='6' y='6' width='88' height='88' rx='10' fill='%23e2412a'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='%23efe6d3'>墨</text></svg>" />
+    <link rel="stylesheet" href="/src/fonts.css" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="viewport"><canvas id="game"></canvas></div>
+
+    <div id="menu" class="screen">
+      <div class="title-block">
+        <div class="kanji-title">墨</div>
+        <h1>INKRUNNER</h1>
+        <p class="tagline">The world is ink. Your brush is the only color.</p>
+      </div>
+      <div class="tabs" id="tabs" role="tablist" aria-label="How to play">
+        <button class="tab" id="tab-campaign" role="tab" aria-selected="true" aria-controls="panel-campaign">The Unfinished Scroll</button>
+        <button class="tab" id="tab-free" role="tab" aria-selected="false" aria-controls="panel-free" tabindex="-1">Free play</button>
+      </div>
+      <div class="panel" id="panel-campaign" role="tabpanel" aria-labelledby="tab-campaign">
+        <div class="journey" id="journey"></div>
+        <p class="journey-next" id="journey-next"></p>
+      </div>
+      <div class="panel" id="panel-free" role="tabpanel" aria-labelledby="tab-free" hidden>
+        <div class="scrolls" id="scrolls"></div>
+      </div>
+      <p class="choose" id="choose">Choose your traveler</p>
+      <div class="cards">
+        <button class="card" data-char="ren">
+          <canvas width="280" height="190"></canvas>
+          <div class="name">Ren <span>蓮</span></div>
+          <div class="desc">A wandering painter in a straw hat.</div>
+          <div class="ability">Deep inkwell · 40% more ink</div>
+        </button>
+        <button class="card" data-char="kohaku">
+          <canvas width="280" height="190"></canvas>
+          <div class="name">Kohaku <span>琥珀</span></div>
+          <div class="desc">A fox spirit who paints with its tail.</div>
+          <div class="ability">Fox leap · double jump</div>
+        </button>
+      </div>
+      <p class="controls desktop-only">
+        <b>Space</b> jump &nbsp;·&nbsp; <b>Hold mouse</b> paint (time slows) &nbsp;·&nbsp; <b id="ink-keys-label">1 2 3 4</b> inks
+        (<button id="btn-keys" class="text-button">change</button>) &nbsp;·&nbsp; <b>Right-click</b> undo &nbsp;·&nbsp; <b>G</b> ghosts
+      </p>
+      <p class="controls touch-only">Paint with one finger · jump with the other thumb · tap a stone to switch ink</p>
+    </div>
+
+    <div id="map" class="screen hidden" role="region" aria-label="The Unfinished Scroll: map">
+      <div class="map-view"><canvas></canvas><div class="map-nodes"></div><div class="map-slots"></div></div>
+      <div class="map-hud">
+        <button id="map-back" class="map-btn">Title</button>
+        <div class="map-travelers" role="radiogroup" aria-label="Traveler">
+          <button class="map-btn" role="radio" data-char="ren" aria-checked="true">Ren <span>蓮</span></button>
+          <button class="map-btn" role="radio" data-char="kohaku" aria-checked="false">Kohaku <span>琥珀</span></button>
+        </div>
+      </div>
+      <p class="map-hint"></p>
+    </div>
+
+    <div id="finish" class="screen hidden">
+      <div class="result">
+        <div class="stamp" id="stamp">松</div>
+        <div>
+          <h2>The scroll is complete</h2>
+          <p class="rank" id="rank"></p>
+          <p class="stats" id="stats"></p>
+        </div>
+      </div>
+      <div class="buttons share">
+        <button id="btn-clip" class="primary">Save highlight clip</button>
+        <button id="btn-card">Share card</button>
+        <button id="btn-scroll">Full scroll</button>
+      </div>
+      <div class="buttons">
+        <button id="btn-continue" class="primary" hidden>Continue the journey</button>
+        <button id="btn-again">Run again</button>
+        <button id="btn-menu">Choose scroll</button>
+      </div>
+    </div>
+
+    <div id="rec" class="hidden"><span class="dot"></span> Painting your highlight clip…</div>
+    <button id="pause-button" class="touch-only hidden" aria-label="Pause game">Ⅱ</button>
+    <div id="pause" class="screen hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+      <div class="pause-sheet">
+        <h2 id="pause-title">The scroll rests</h2>
+        <div class="buttons">
+          <button id="btn-resume" class="primary">Continue</button>
+          <button id="btn-undo">Undo last stroke</button>
+          <button id="btn-lantern">Back to lantern</button>
+          <button id="btn-ghosts" aria-pressed="true">Ghost ink: on</button>
+          <button id="btn-pause-menu">Choose scroll</button>
+        </div>
+      </div>
+    </div>
+    <div id="keys" class="screen hidden" role="dialog" aria-modal="true" aria-labelledby="keys-title">
+      <div class="pause-sheet">
+        <h2 id="keys-title">Ink keys</h2>
+        <div class="key-rows" id="key-rows"></div>
+        <p class="key-note" id="key-note" aria-live="polite">Choose an ink, then press its new key.</p>
+        <div class="buttons">
+          <button id="btn-keys-reset">Back to 1 2 3 4</button>
+          <button id="btn-keys-done" class="primary">Done</button>
+        </div>
+      </div>
+    </div>
+    <div id="export-status" class="hidden" role="status"></div>
+    <button id="jump" class="hidden" aria-label="Jump">跳</button>
+    <button id="mute" aria-label="Toggle sound">♪</button>
+    <div id="rotate"><div>墨</div><p>Turn your device sideways to unroll the scroll.</p></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

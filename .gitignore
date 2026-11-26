@@ -1,0 +1,11 @@
+node_modules
+dist
+shots
+server/data
+.vercel
+.env*
+.apple/
+__pycache__/
+*.p8
+*.p12
+*.mobileprovision
